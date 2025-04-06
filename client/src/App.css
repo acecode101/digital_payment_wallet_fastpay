@@ -1,0 +1,32 @@
+body {
+  font-family: sans-serif;
+  background: #f4f4f4;
+  padding: 40px;
+  margin: 0;
+}
+
+.container {
+  max-width: 500px;
+  margin: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+input, button {
+  padding: 10px;
+  font-size: 16px;
+}
+
+button {
+  background: #00b894;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
