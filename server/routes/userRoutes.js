@@ -52,13 +52,11 @@ router.post('/login', async (req, res) => {
 });
 
 // GET /api/users/profile
+// GET /api/users/profile
 router.get('/profile', authMiddleware, async (req, res) => {
   try {
-    const user = await User.findById(req.userId).select('-password');
-    res.json(user);
+    res.json(req.user); // <== FIXED HERE: Use req.user which is set by middleware
   } catch (err) {
     res.status(500).json({ message: 'Unable to fetch profile' });
   }
 });
-
-module.exports = router;
