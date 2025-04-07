@@ -12,11 +12,12 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('/api/users/signup', formData);
+      const res = await axios.post('http://localhost:5000/api/users/signup', formData);
       localStorage.setItem('token', res.data.token);
       alert('Signup successful');
       navigate('/dashboard');
     } catch (error) {
+      console.error(error);
       alert(error.response?.data?.message || 'Signup failed');
     }
   };
@@ -24,8 +25,8 @@ const Signup = () => {
   return (
     <form onSubmit={handleSubmit} className="form">
       <h2>Sign Up</h2>
-      <input name="email" placeholder="Email" type="email" onChange={handleChange} required />
-      <input name="password" placeholder="Password" type="password" onChange={handleChange} required />
+      <input name="email" placeholder="Email" type="email" value={formData.email} onChange={handleChange} required />
+      <input name="password" placeholder="Password" type="password" value={formData.password} onChange={handleChange} required />
       <button type="submit">Sign Up</button>
     </form>
   );
