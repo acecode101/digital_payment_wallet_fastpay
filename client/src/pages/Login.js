@@ -1,31 +1,21 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 
-const Login = () => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const navigate = useNavigate();
+const Login = ({ onLogin }) => {
+  const [form, setForm] = useState({ email: '', password: '' });
 
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
-
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    try {
-      const res = await axios.post('http://localhost:5000/api/users/login', formData);
-      localStorage.setItem('token', res.data.token);
-      alert('Login successful');
-      navigate('/dashboard');
-    } catch (error) {
-      console.error(error);
-      alert(error.response?.data?.message || 'Login failed');
-    }
+    const res = await axios.post('http://localhost:5000/api/auth/login', form);
+    localStorage.setItem('token', res.data.token);
+    onLogin();
   };
 
   return (
-    <form onSubmit={handleSubmit} className="form">
+    <form onSubmit={handleLogin} style={{ margin: '2rem' }}>
       <h2>Login</h2>
-      <input name="email" placeholder="Email" type="email" value={formData.email} onChange={handleChange} required />
-      <input name="password" placeholder="Password" type="password" value={formData.password} onChange={handleChange} required />
+      <input placeholder="Email" onChange={e => setForm({ ...form, email: e.target.value })} /><br />
+      <input placeholder="Password" type="password" onChange={e => setForm({ ...form, password: e.target.value })} /><br />
       <button type="submit">Login</button>
     </form>
   );
