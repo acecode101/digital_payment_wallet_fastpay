@@ -1,74 +1,77 @@
+// client/src/pages/Dashboard.js
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
-  const [transactions, setTransactions] = useState([]);
-  const [receiverEmail, setReceiverEmail] = useState('');
+  const [user, setUser] = useState({});
   const [amount, setAmount] = useState('');
+  const [history, setHistory] = useState([]);
+  const navigate = useNavigate();
 
   const token = localStorage.getItem('token');
 
-  const fetchTransactions = async () => {
-    try {
-      const res = await axios.get('/api/transactions/history', {
-        headers: { Authorization: `Bearer ${token}` },
+  useEffect(() => {
+    if (!token) return navigate('/');
+    const fetchData = async () => {
+      const resUser = await axios.get('http://localhost:5000/api/auth/me', {
+        headers: { Authorization: token },
       });
-      setTransactions(res.data);
-    } catch (error) {
-      alert('Error fetching transactions');
-    }
-  };
+      setUser(resUser.data);
 
-  const sendMoney = async (e) => {
-    e.preventDefault();
+      const resHistory = await axios.get('http://localhost:5000/api/transactions/history', {
+        headers: { Authorization: token },
+      });
+      setHistory(resHistory.data);
+    };
+    fetchData();
+  }, [token, navigate]);
+
+  const handleTransaction = async () => {
     try {
       await axios.post(
-        '/api/transactions/send',
-        { receiverEmail, amount },
-        { headers: { Authorization: `Bearer ${token}` } }
+        'http://localhost:5000/api/transactions',
+        { amount: parseFloat(amount) },
+        { headers: { Authorization: token } }
       );
-      alert('Transaction successful!');
-      setReceiverEmail('');
-      setAmount('');
-      fetchTransactions();
-    } catch (error) {
-      alert(error.response?.data?.message || 'Transaction failed');
+      alert('Transaction successful');
+      window.location.reload();
+    } catch (err) {
+      alert('Transaction failed');
     }
   };
 
-  useEffect(() => {
-    fetchTransactions();
-  }, []);
+  const logout = () => {
+    localStorage.removeItem('token');
+    navigate('/');
+  };
 
   return (
-    <div className="container">
-      <h2>Dashboard</h2>
+    <div style={{ margin: '2rem' }}>
+      <h2>Welcome, {user.name}</h2>
+      <p>Email: {user.email}</p>
+      <p>Balance: ₹{user.balance}</p>
 
-      <form onSubmit={sendMoney} className="form">
-        <input
-          placeholder="Receiver Email"
-          value={receiverEmail}
-          onChange={(e) => setReceiverEmail(e.target.value)}
-          required
-        />
-        <input
-          placeholder="Amount"
-          type="number"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          required
-        />
-        <button type="submit">Send</button>
-      </form>
+      <input
+        type="number"
+        placeholder="Amount"
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
+      />
+      <button onClick={handleTransaction}>Send Money</button>
 
       <h3>Transaction History</h3>
       <ul>
-        {transactions.map((txn, i) => (
-          <li key={i}>
-            {txn.sender.email} ➡️ {txn.receiver.email}: ₹{txn.amount}
+        {history.map((tx, index) => (
+          <li key={index}>
+            {tx.type} of ₹{tx.amount} on {new Date(tx.date).toLocaleString()}
           </li>
         ))}
       </ul>
+
+      <Link to="/graph">📊 View Graph</Link>
+      <br />
+      <button onClick={logout} style={{ marginTop: '1rem' }}>Logout</button>
     </div>
   );
 };
